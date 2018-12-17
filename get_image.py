@@ -16,8 +16,13 @@ class data:
         data = h5py.File(path)
         if (train_or_test == 0):
             ret_image = np.array(data['train_set_x'])
-            ret_label = np.array(data['train_set_y'])
+            label_value = np.array(data['train_set_y'])
         else:
             ret_image = np.array(data['test_set_x'])
-            ret_label = np.array(data['test_set_y'])
+            label_value = np.array(data['test_set_y'])
+        ret_label = [0] * np.shape(ret_image)[0]
+        for i in range(0, np.shape(ret_image)[0]):
+            ret = [0] * 2
+            ret[label_value[i]] = 1
+            ret_label[i] = ret
         return (ret_image / 255, ret_label)

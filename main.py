@@ -85,7 +85,6 @@ def main():
             test_loss.append(TmpTestLoss)
             train_accuracy.append(TmpAcc)
             test_accuracy.append(TmpTestAcc)
-    print("Best accuracy :", a, ", index :", b)
     plot(train_loss, test_loss, train_accuracy, test_accuracy)
 
 if __name__ == "__main__":

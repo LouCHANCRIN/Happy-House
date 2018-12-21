@@ -25,32 +25,23 @@ def plot(train_loss, test_loss, train_accuracy, test_accuracy):
     plt.show()
 
 def my_weight_and_bias(nb_class, nb_chanel, batch_size):
-    w = {'conv1': tf.Variable(tf.random_normal([3,3,nb_chanel,32])),
-         'conv2': tf.Variable(tf.random_normal([3,3,32,64])),
-         'conv3': tf.Variable(tf.random_normal([3,3,64,128])),
-         'fc1': tf.Variable(tf.random_normal([8*8*128,128])),
-         'output': tf.Variable(tf.random_normal([128, nb_class]))}
-    b = {'conv1': tf.Variable(tf.random_normal([32])),
-         'conv2': tf.Variable(tf.random_normal([64])),
-         'conv3': tf.Variable(tf.random_normal([128])),
-         'fc1': tf.Variable(tf.random_normal([128])),
-         'output': tf.Variable(tf.random_normal([nb_class]))}
-    return (w, b)
-
-def my_weight_and_bias2(nb_class, nb_chanel, batch_size):
-    w = {'conv1': tf.Variable(tf.random_normal([3,3,nb_chanel,32], seed=3)),
-         'fc1': tf.Variable(tf.random_normal([32*32*32,32], seed=5)),
-         'output': tf.Variable(tf.random_normal([32, nb_class], seed=4))}
-    b = {'conv1': tf.Variable(tf.random_normal([32], seed=3)),
-         'fc1': tf.Variable(tf.random_normal([32], seed=9)),
-         'output': tf.Variable(tf.random_normal([nb_class], seed=5))}
+    w = {'conv1': tf.Variable(tf.random_normal([3,3,nb_chanel,32], seed=1)),
+         'conv2': tf.Variable(tf.random_normal([3,3,32,64], seed=1)),
+         'conv3': tf.Variable(tf.random_normal([3,3,64,128], seed=1)),
+         'fc1': tf.Variable(tf.random_normal([8*8*128,128], seed=1)),
+         'output': tf.Variable(tf.random_normal([128, nb_class], seed=1))}
+    b = {'conv1': tf.Variable(tf.random_normal([32], seed=1)),
+         'conv2': tf.Variable(tf.random_normal([64], seed=1)),
+         'conv3': tf.Variable(tf.random_normal([128], seed=1)),
+         'fc1': tf.Variable(tf.random_normal([128], seed=1)),
+         'output': tf.Variable(tf.random_normal([nb_class], seed=1))}
     return (w, b)
 
 def main():
-    alpha = 0.05
-    num_epoch = 200
+    alpha = 0.008
+    num_epoch = 500
     nb_class = np.shape(data.train_label)[1]
-    batch_size = 60
+    batch_size = 32
     nb_image, line, col, nb_chanel = np.shape(data.train_data)
     data.train_data = np.reshape(data.train_data, [nb_image, line, col, nb_chanel])
     data.test_data = np.reshape(data.test_data, [np.shape(data.test_data)[0],
@@ -73,31 +64,29 @@ def main():
         test_loss = []
         train_accuracy = []
         test_accuracy = []
+        best_accuracy = 0
         for e in range(0, num_epoch):
             for i in range(0, int(nb_image / batch_size)):
                 batch_x = data.train_data[i*batch_size:min((i+1)*batch_size,
                     len(data.train_data))]
                 batch_y = data.train_label[i*batch_size:min((i+1)*batch_size,
                     len(data.train_label))]
-                #print(sess.run(pred, feed_dict={x: data.test_data, y: data.test_label}))
                 sess.run(optimizer, feed_dict={x: batch_x, y: batch_y})
-            TmpLoss, TmpAcc = sess.run([cost, accuracy], feed_dict={x: data.train_data, y: data.train_label})
+            TmpLoss, TmpAcc = sess.run([cost, accuracy],
+                    feed_dict={x: data.train_data, y: data.train_label})
             TmpTestLoss, TmpTestAcc = sess.run([cost, accuracy],
                     feed_dict={x: data.test_data, y: data.test_label})
-            print("Epoch :", e, ", Loss :", TmpLoss, "test lost :", TmpTestLoss, ", Train acc :",
-                    TmpAcc, ", Test acc :", TmpTestAcc)
+            print("Epoch :", e, ", Loss :", TmpLoss, "test lost :", TmpTestLoss,
+                    ", Train acc :", TmpAcc, ", Test acc :", TmpTestAcc)
+            if (TmpTestAcc > best_accuracy):
+                best_accuracy = TmpTestAcc
+                print("\nBest acc :", best_accuracy, ", index :", e, "\n")
             train_loss.append(TmpLoss)
             test_loss.append(TmpTestLoss)
             train_accuracy.append(TmpAcc)
             test_accuracy.append(TmpTestAcc)
+    print("Best accuracy :", a, ", index :", b)
     plot(train_loss, test_loss, train_accuracy, test_accuracy)
-    a = 0
-    b = 0
-    for i in range(0, num_epoch):
-        if (test_loss[i] > a):
-            a = test_accuracy[i]
-            b = i
-    print("max :", a, "(", b, ")")
 
 if __name__ == "__main__":
     main()
